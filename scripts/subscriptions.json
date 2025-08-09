@@ -1,19 +1,19 @@
 [
   {
     "name": "B站-老番茄",
-    "url": "https://rsshub.app/bilibili/user/video/2267573",
+    "url": "https://rsshub.app/bilibili/user/video/2267573.json?filter=视频",
     "type": "bilibili",
     "quality": 720
   },
   {
     "name": "YouTube-TechLinked",
-    "url": "https://rsshub.app/youtube/channel/UCXuqSBlHAE6Xw-yeJA0Tunw",
+    "url": "https://rsshub.app/youtube/channel/UCXuqSBlHAE6Xw-yeJA0Tunw.json",
     "type": "youtube",
     "quality": 720
   },
   {
     "name": "微博-人民日报",
-    "url": "https://rsshub.app/weibo/user/2803301701",
+    "url": "https://rsshub.app/weibo/user/2803301701.json?filter=视频",
     "type": "weibo",
     "quality": "best"
   }
