@@ -1,0 +1,20 @@
+[
+  {
+    "name": "B站-老番茄",
+    "url": "https://rsshub.app/bilibili/user/video/2267573",
+    "type": "bilibili",
+    "quality": 720
+  },
+  {
+    "name": "YouTube-TechLinked",
+    "url": "https://rsshub.app/youtube/channel/UCXuqSBlHAE6Xw-yeJA0Tunw",
+    "type": "youtube",
+    "quality": 720
+  },
+  {
+    "name": "微博-人民日报",
+    "url": "https://rsshub.app/weibo/user/2803301701",
+    "type": "weibo",
+    "quality": "best"
+  }
+]

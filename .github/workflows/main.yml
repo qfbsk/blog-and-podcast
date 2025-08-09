@@ -1,0 +1,47 @@
+name: RSS Video to Lanzou Premium
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # 每天UTC时间3点运行（北京时间11点）
+  workflow_dispatch:
+
+jobs:
+  download_and_upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          pip install --upgrade pip
+          pip install -r clean-ytdlp/requirements.txt
+      
+      - name: Run downloader
+        run: python scripts/downloader.py
+        
+      - name: Prepare upload files
+        run: |
+          mkdir upload
+          cp -r videos covers metadata upload/
+          echo "DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
+      
+      - name: Upload to Lanzou Cloud Premium
+        uses: ./action-upload
+        with:
+          username: ${{ secrets.LANZOU_USER }}
+          password: ${{ secrets.LANZOU_PASSWORD }}
+          folder_id: ${{ secrets.LANZOU_FOLDER_ID || '0' }}
+          files: |
+            upload/*
+      
+      - name: Clean workspace
+        run: |
+          rm -rf upload videos covers metadata
