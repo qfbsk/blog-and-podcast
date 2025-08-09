@@ -22,21 +22,25 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg curl jq
           pip install --upgrade pip
-          pip install ./clean-ytdlp
+          pip install yt-dlp
       
       - name: Run downloader
-        run: python scripts/downloader.py
+        run: |
+          python scripts/downloader.py
         
       - name: Prepare upload files
         run: |
           mkdir -p upload/videos upload/covers upload/metadata
+          
+          # 移动文件，忽略空目录错误
           mv videos/* upload/videos/ || echo "没有视频文件"
           mv covers/* upload/covers/ || echo "没有封面文件"
           mv metadata/* upload/metadata/ || echo "没有元数据文件"
-          echo "DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
+          
           # 调试信息
-          echo "上传文件列表:"
+          echo "====== 上传文件列表 ======"
           find upload -type f
+          echo "========================="
       
       - name: Upload to Lanzou Cloud Premium
         uses: ./action-upload
