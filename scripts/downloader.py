@@ -25,16 +25,37 @@ sequence = get_today_sequence()
 
 for sub in subscriptions:
     try:
-        # 获取RSS源数据
-        cmd = f"curl -s '{sub['url']}'"
+        print(f"\n处理订阅源: {sub['name']}")
+        print(f"URL: {sub['url']}?format=json")
+        
+        # 获取RSS源数据（添加format=json参数）
+        cmd = f"curl -s '{sub['url']}?format=json'"
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-        rss_data = json.loads(result.stdout)
+        
+        # 调试输出
+        print(f"状态码: {result.returncode}")
+        print(f"输出长度: {len(result.stdout)}")
+        print(f"错误信息: {result.stderr}")
+        
+        if result.returncode != 0 or len(result.stdout) < 10:
+            print("获取RSS数据失败")
+            continue
+        
+        try:
+            rss_data = json.loads(result.stdout)
+        except json.JSONDecodeError as e:
+            print(f"JSON解析失败: {str(e)}")
+            # 打印前200个字符帮助调试
+            print("响应内容前200字符:", result.stdout[:200])
+            continue
         
         # 只处理最新一条视频
         if not rss_data['items']:
+            print("没有找到视频项目")
             continue
             
         latest_item = rss_data['items'][0]
+        print(f"找到视频: {latest_item['title']}")
         
         # 设置文件名
         file_prefix = f"{current_date}_{str(sequence).zfill(2)}"
@@ -42,6 +63,7 @@ for sub in subscriptions:
         
         # 设置下载质量
         quality = f"best[height<={sub['quality']}]" if isinstance(sub['quality'], int) else "best"
+        print(f"下载质量: {quality}")
         
         # 下载视频
         video_cmd = [
@@ -53,6 +75,7 @@ for sub in subscriptions:
             '--no-check-certificate',
             latest_item['url'] or latest_item['link']
         ]
+        print("执行命令:", " ".join(video_cmd))
         subprocess.run(video_cmd, check=True)
         
         # 生成元数据
@@ -69,11 +92,20 @@ for sub in subscriptions:
         }
         
         # 保存封面文件
+        cover_found = False
         for ext in ['jpg', 'webp', 'png']:
             cover_src = f"videos/{file_prefix}.{ext}"
             if os.path.exists(cover_src):
                 os.rename(cover_src, f"covers/{file_prefix}_cover.jpg")
+                cover_found = True
                 break
+        
+        if not cover_found:
+            print("警告: 未找到封面文件")
+        
+        # 保存单个视频元数据
+        with open(f'metadata/{file_prefix}.json', 'w') as f:
+            json.dump(metadata, f, indent=2)
         
         print(f"成功处理: {sub['name']}")
         
@@ -87,10 +119,14 @@ all_metadata = {
 }
 
 for file in os.listdir('metadata'):
-    if file.endswith('.json'):
-        with open(f'metadata/{file}', 'r') as f:
-            video_data = json.load(f)
-            all_metadata["videos"].append(video_data)
+    if file.endswith('.json') and file.startswith(current_date):
+        try:
+            with open(f'metadata/{file}', 'r') as f:
+                video_data = json.load(f)
+                all_metadata["videos"].append(video_data)
+        except:
+            continue
 
 with open(f'metadata/{current_date}.json', 'w') as f:
     json.dump(all_metadata, f, indent=2)
+    print(f"生成总元数据文件: metadata/{current_date}.json")
