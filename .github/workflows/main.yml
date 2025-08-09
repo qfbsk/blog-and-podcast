@@ -22,7 +22,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg curl jq
           pip install --upgrade pip
-          # 直接安装yt-dlp
           pip install ./clean-ytdlp
       
       - name: Run downloader
@@ -30,18 +29,25 @@ jobs:
         
       - name: Prepare upload files
         run: |
-          mkdir upload
-          cp -r videos covers metadata upload/
+          mkdir -p upload/videos upload/covers upload/metadata
+          mv videos/* upload/videos/ || echo "没有视频文件"
+          mv covers/* upload/covers/ || echo "没有封面文件"
+          mv metadata/* upload/metadata/ || echo "没有元数据文件"
           echo "DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
+          # 调试信息
+          echo "上传文件列表:"
+          find upload -type f
       
       - name: Upload to Lanzou Cloud Premium
         uses: ./action-upload
         with:
           username: ${{ secrets.LANZOU_USER }}
           password: ${{ secrets.LANZOU_PASSWORD }}
-          folder_id: ${{ secrets.LANZOU_FOLDER_ID || '0' }}
+          uuid: ${{ secrets.LANZOU_FOLDER_ID }}  # 使用 uuid 参数
           files: |
-            upload/*
+            upload/videos/*
+            upload/covers/*
+            upload/metadata/*
       
       - name: Clean workspace
         run: |
