@@ -1,7 +1,7 @@
 [
   {
     "name": "B站-老番茄",
-    "url": "https://rsshub.liumingye.cn/bilibili/user/video/87721937",
+    "url": "https://rsshub.liumingye.cn/bilibili/user/video/87721937?formart=json",
     "type": "bilibili",
     "quality": 720
   },
